@@ -329,7 +329,7 @@ footer{background:var(--azul-dark);color:#fff;padding:56px 0 26px;}
 
   <section class="hero">
     <div class="hero-video-bg">
-      <iframe src="https://www.youtube.com/embed/v7AYKMP6rOE?autoplay=1&mute=1&loop=1&playlist=v7AYKMP6rOE&controls=0&showinfo=0&rel=0&disablekb=1" frameborder="0" allow="autoplay; fullscreen" style="width:100vw;height:100vh;pointer-events:none;transform:scale(1.5);"></iframe>
+      <iframe src="https://www.youtube.com/embed/v7AYKMP6rOE?autoplay=1&mute=1&playsinline=1&loop=1&playlist=v7AYKMP6rOE&controls=0&showinfo=0&rel=0&disablekb=1" frameborder="0" allow="autoplay; fullscreen" style="width:100vw;height:100vh;pointer-events:none;transform:scale(1.5);"></iframe>
     </div>
     <div class="container hero-grid">
       <div class="reveal delay-1">
@@ -859,7 +859,7 @@ function chatSend(){
     body.scrollTop=body.scrollHeight;
   }, 500);
 }
-// ---- Animaciones de Scroll (Reveal) ----
+// ---- Animaciones de Scroll (Reveal) y Lazy Load de Videos ----
 document.addEventListener('DOMContentLoaded', () => {
   const revealElements = document.querySelectorAll('section > .container, .cert-card, .stat, .testi-card, .instr-card');
   revealElements.forEach((el, index) => {
@@ -876,12 +876,43 @@ document.addEventListener('DOMContentLoaded', () => {
     entries.forEach(entry => {
       if(entry.isIntersecting) {
         entry.target.classList.add('active');
+        
+        // Inyectar video dinámico en los placeholders si existen dentro de este elemento
+        const placeholders = entry.target.querySelectorAll('.thumb, .vid, .tour-video, .video-frame, .instr-photo');
+        placeholders.forEach(ph => {
+          if(!ph.dataset.loaded) {
+            ph.dataset.loaded = 'true';
+            // Limpiar contenido previo (botón play, labels)
+            ph.innerHTML = '';
+            // Insertar iframe de YouTube (yoga genérico, autoplay, mute, playsinline, segment de 10s)
+            // Se usa start=30 y end=40 como ejemplo de segmento de 10 seg
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.youtube.com/embed/sTANio_2E0Q?autoplay=1&mute=1&playsinline=1&loop=1&playlist=sTANio_2E0Q&controls=0&start=30&end=40&rel=0&disablekb=1';
+            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;transform:scale(1.3);border:none;';
+            iframe.setAttribute('allow', 'autoplay; fullscreen');
+            ph.style.overflow = 'hidden';
+            ph.appendChild(iframe);
+          }
+        });
+        
+        // Si el propio elemento es un placeholder (caso tour-video que puede ser target directo)
+        if(entry.target.classList.contains('tour-video') && !entry.target.dataset.loaded) {
+            entry.target.dataset.loaded = 'true';
+            entry.target.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.youtube.com/embed/sTANio_2E0Q?autoplay=1&mute=1&playsinline=1&loop=1&playlist=sTANio_2E0Q&controls=0&start=50&end=60&rel=0&disablekb=1';
+            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;transform:scale(1.3);border:none;';
+            iframe.setAttribute('allow', 'autoplay; fullscreen');
+            entry.target.style.overflow = 'hidden';
+            entry.target.appendChild(iframe);
+        }
+
         observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
 
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal, .tour-video').forEach(el => observer.observe(el));
 });
 </script>
 </body>
