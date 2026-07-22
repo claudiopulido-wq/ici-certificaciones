@@ -71,8 +71,9 @@ nav.mainnav{display:flex;align-items:center;gap:6px;}
 
 /* ---------- HERO ---------- */
 .hero{position:relative;background:#000;color:#fff;overflow:hidden;min-height:100vh;display:flex;align-items:center;}
-.hero-video-bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(27,63,140,0.85) 0%, rgba(227,30,46,0.6) 100%);z-index:1;}
+.hero-video-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.6;}
+.hero-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.35);z-index:1;}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(27,63,140,0.85) 0%, rgba(247,181,0,0.7) 100%);z-index:1;}
 .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(to top, var(--blanco) 0%, transparent 100%);z-index:1;}
 .hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:center;padding:64px 24px;width:100%;max-width:1180px;margin:0 auto;}
 .hero h1{text-shadow:0 2px 12px rgba(0,0,0,.25);}
@@ -328,9 +329,10 @@ footer{background:var(--azul-dark);color:#fff;padding:56px 0 26px;}
 <main id="view-home" class="view active">
 
   <section class="hero">
-    <div class="hero-video-bg">
-      <iframe src="https://www.youtube.com/embed/v7AYKMP6rOE?autoplay=1&mute=1&playsinline=1&loop=1&playlist=v7AYKMP6rOE&controls=0&showinfo=0&rel=0&disablekb=1" frameborder="0" allow="autoplay; fullscreen" style="width:100vw;height:100vh;pointer-events:none;transform:scale(1.5);"></iframe>
-    </div>
+    <video class="hero-video-bg" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1200&auto=format&fit=crop">
+      <source src="https://cdn.pixabay.com/video/2019/01/17/20772-312211995_tiny.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
     <div class="container hero-grid">
       <div class="reveal delay-1">
         <span class="eyebrow" style="color:var(--rojo);background:#fff;padding:5px 12px;border-radius:100px;display:inline-block">Inscripciones abiertas</span>
@@ -511,7 +513,10 @@ footer{background:var(--azul-dark);color:#fff;padding:56px 0 26px;}
       </div>
       <div class="tour-wrap">
         <div class="tour-video">
-          <div class="play"><span>▶</span><div style="font-size:.82rem;opacity:.8">Video 3D: tour del centro · reproductor protagonista, no fondo · inserta aquí archivo .mp4 en HD</div></div>
+          <video style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200&auto=format&fit=crop">
+            <source src="https://cdn.pixabay.com/video/2019/01/17/20772-312211995_tiny.mp4" type="video/mp4">
+          </video>
+          <div class="play" style="z-index:3;"><span>▶</span><div style="font-size:.82rem;opacity:.8;background:rgba(0,0,0,0.5);padding:4px 8px;border-radius:4px;margin-top:10px;">Video 3D: tour del centro · reproductor nativo</div></div>
         </div>
       </div>
     </div>
@@ -876,43 +881,12 @@ document.addEventListener('DOMContentLoaded', () => {
     entries.forEach(entry => {
       if(entry.isIntersecting) {
         entry.target.classList.add('active');
-        
-        // Inyectar video dinámico en los placeholders si existen dentro de este elemento
-        const placeholders = entry.target.querySelectorAll('.thumb, .vid, .tour-video, .video-frame, .instr-photo');
-        placeholders.forEach(ph => {
-          if(!ph.dataset.loaded) {
-            ph.dataset.loaded = 'true';
-            // Limpiar contenido previo (botón play, labels)
-            ph.innerHTML = '';
-            // Insertar iframe de YouTube (yoga genérico, autoplay, mute, playsinline, segment de 10s)
-            // Se usa start=30 y end=40 como ejemplo de segmento de 10 seg
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://www.youtube.com/embed/sTANio_2E0Q?autoplay=1&mute=1&playsinline=1&loop=1&playlist=sTANio_2E0Q&controls=0&start=30&end=40&rel=0&disablekb=1';
-            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;transform:scale(1.3);border:none;';
-            iframe.setAttribute('allow', 'autoplay; fullscreen');
-            ph.style.overflow = 'hidden';
-            ph.appendChild(iframe);
-          }
-        });
-        
-        // Si el propio elemento es un placeholder (caso tour-video que puede ser target directo)
-        if(entry.target.classList.contains('tour-video') && !entry.target.dataset.loaded) {
-            entry.target.dataset.loaded = 'true';
-            entry.target.innerHTML = '';
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://www.youtube.com/embed/sTANio_2E0Q?autoplay=1&mute=1&playsinline=1&loop=1&playlist=sTANio_2E0Q&controls=0&start=50&end=60&rel=0&disablekb=1';
-            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;transform:scale(1.3);border:none;';
-            iframe.setAttribute('allow', 'autoplay; fullscreen');
-            entry.target.style.overflow = 'hidden';
-            entry.target.appendChild(iframe);
-        }
-
         observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
 
-  document.querySelectorAll('.reveal, .tour-video').forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 });
 </script>
 </body>
